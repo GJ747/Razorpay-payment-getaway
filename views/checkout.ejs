@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>checkout</title>
+</head>
+<body>
+    
+    <h5 >Confirm Order</h5>
+    <p >Thank you for taking up this decision.</p>
+    <dl >
+        <dt >Order ID</dt>
+        <dd  id="orderId"><%- paymentDetail.orderId %>  </dd>
+
+        <dt >Currency</dt>
+        <dd ><%- paymentDetail.currency %>  </dd>
+                            
+        <dt >Amount</dt>
+        <dd ><%- paymentDetail.amount/100 %> Rs. </dd>
+    </dl>
+    <button type="submit"  onclick="checkout(event)">Checkout</button>
+    <form id="paymentVerifyForm" action="/verify" method="POST">
+        <input name="razorpay_payment_id" type="hidden" id="razorpay_payment_id" />
+        <input name="razorpay_order_id" type="hidden" id="razorpay_order_id"/>
+        <input name="razorpay_signature" type="hidden" id="razorpay_signature"/>
+    </form>
+
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <script>
+        function checkout(event) {
+            const razorpayKeyId = '<%- razorpayKeyId %>'
+            const orderId = '<%- JSON.stringify(paymentDetail.orderId) %>'
+            const options = {
+                "key": razorpayKeyId,
+                "currency": "INR",
+                "name": "Razor Tutorial",
+                "description": "Razor Test Transaction",
+                // "image": "https://previews.123rf.com/images/subhanbaghirov/subhanbaghirov1605/subhanbaghirov160500087/56875269-vector-light-bulb-icon-with-concept-of-idea-brainstorming-idea-illustration-.jpg",
+                "order_id": JSON.parse(orderId),
+                "handler": function (response){
+                    document.getElementById('razorpay_payment_id').value= response.razorpay_payment_id;
+                    document.getElementById('razorpay_order_id').value= response.razorpay_order_id;
+                    document.getElementById('razorpay_signature').value= response.razorpay_signature;
+                    document.getElementById("paymentVerifyForm").submit();
+                },
+                "modal": {
+                    ondismiss: function() {
+                        alert(`Payment Failed`)
+                    }
+                },
+                "theme": {
+                    "color": "#22527b"
+                }
+            };
+            const razorpay = new Razorpay(options);
+            razorpay.open();
+            event.preventDefault();
+        }
+    </script>
+
+</body>
+</html>
